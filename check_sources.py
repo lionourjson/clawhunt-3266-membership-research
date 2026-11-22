@@ -104,7 +104,7 @@ def main():
     official = [r for r in charters if "官方网站" in r["发布方"] and r["链接"].startswith("https://www.")]
     check("两家商会章程来源都是官方网站公开文件，并在备忘录写明名称与来源",
           len(official) == 2 and all(r["编号"] in memo for r in official) and "章程来源 S08" in memo and "章程来源 S13" in memo,
-          "；".join(f"{r['编号']} {r['发布方']} {r['链接']}" for r in official))
+          "；".join(f"{r['编号']} {r['发布方']}" for r in official))
 
     # 4. 会员分级 × 权利义务表：至少 4 个级别（按对象统计）
     trows = list(csv.DictReader(open(TABLE_CSV, encoding="utf-8")))
@@ -137,7 +137,8 @@ def main():
         bad = []
         for r in rows:
             code, err = fetch(r["链接"], timeout, retries)
-            print(f"       {r['编号']} HTTP {code if code else '-'} {r['链接']}" + (f" ({err})" if err and code != 200 else ""))
+            # 只打印编号和状态，链接见 sources.csv（输出要能原样贴进交付正文，平台正文不接受站外链接）
+            print(f"       {r['编号']} HTTP {code if code else '-'}" + (f" ({err})" if err and code != 200 else ""))
             if code != 200:
                 bad.append(r["编号"])
         check("全部来源链接实时请求返回 HTTP 200", not bad, f"失败 {bad}" if bad else f"{len(rows)}/{len(rows)}")
